@@ -11,3 +11,4 @@
 # Visual Studio profiler
 *.psess
 *.vsp
+*.sublime-*
