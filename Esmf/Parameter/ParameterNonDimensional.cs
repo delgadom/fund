@@ -4,6 +4,7 @@
 // Licensed under the MIT license
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -40,6 +41,17 @@ namespace Esmf
         internal void SkipRandomValues(Random rand)
         {
             _value.GetRandomValue(rand);
+        }
+
+        public override void Save(string filename, string comment=null)
+        {
+            using (var f = File.CreateText(filename))
+            {
+                if (comment != null)
+                    f.WriteLine("# {0}", comment);
+
+                f.WriteLine(_value.ToString());
+            }
         }
     }
 }

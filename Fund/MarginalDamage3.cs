@@ -11,11 +11,13 @@ namespace Fund
 {
     public class MarginalDamage3
     {
+        public delegate void AdditionalInitMethodHandler(Esmf.Model.Model model);
+
         public ParameterValues Parameters { get; set; }
         public MarginalGas Gas { get; set; }
         public Timestep EmissionYear { get; set; }
         public bool UseEquityWeights { get; set; }
-        public Action<Esmf.Model.Model> AdditionalInitMethod { get; set; }
+        public AdditionalInitMethodHandler AdditionalInitMethod { get; set; }
         public double Prtp { get; set; }
         public double Eta { get; set; }
         public int YearsToAggregate { get; set; }
@@ -29,7 +31,9 @@ namespace Fund
 
         public double Start()
         {
-            var f1 = FundModel.GetModel(storeFullVariablesByDefault: false);
+            int yearsToRun = Math.Min(1049, EmissionYear.Value + YearsToAggregate);
+
+            var f1 = FundModel.GetModel(storeFullVariablesByDefault: false, years: yearsToRun);
             f1["impactwaterresources"].Variables["water"].StoreOutput = true;
             f1["ImpactForests"].Variables["forests"].StoreOutput = true;
             f1["ImpactHeating"].Variables["heating"].StoreOutput = true;
@@ -55,9 +59,9 @@ namespace Fund
             var result1 = f1.Run(Parameters);
 
             var i_output1 = new ModelOutput();
-            i_output1.Load(result1);
+            i_output1.Load(result1, years: yearsToRun);
 
-            var f2 = FundModel.GetModel(storeFullVariablesByDefault: false);
+            var f2 = FundModel.GetModel(storeFullVariablesByDefault: false, years: yearsToRun);
             f2["impactwaterresources"].Variables["water"].StoreOutput = true;
             f2["ImpactForests"].Variables["forests"].StoreOutput = true;
             f2["ImpactHeating"].Variables["heating"].StoreOutput = true;
@@ -106,7 +110,7 @@ namespace Fund
             var result2 = f2.Run(Parameters);
 
             var i_output2 = new ModelOutput();
-            i_output2.Load(result2);
+            i_output2.Load(result2, years: yearsToRun);
 
             // Take out growth effect effect of run 2 by transforming
             // the damage from run 2 into % of GDP of run 2, and then
